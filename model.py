@@ -39,9 +39,12 @@ class DWR(nn.Module):
 
 class C2fDWR(nn.Module):
     """C2f block with DWR modules instead of Bottleneck (C2f-DWR)"""
-    def __init__(self, in_channels, out_channels, num_dwr=1, expansion=0.5):
+    def __init__(self, in_channels, out_channels, num_dwr=1, expansion=0.5, dilation_rates=(1, 2, 3)):
         super(C2fDWR, self).__init__()
         hidden_channels = int(out_channels * expansion)
+        num_groups = len(dilation_rates)
+        if hidden_channels % num_groups != 0:
+            hidden_channels = (hidden_channels // num_groups) * num_groups
         self.conv1 = nn.Conv2d(in_channels, hidden_channels, kernel_size=1, bias=False)
         self.bn1 = nn.BatchNorm2d(hidden_channels)
         self.relu = nn.ReLU(inplace=True)
@@ -137,8 +140,8 @@ class YOLOv8UC(nn.Module):
             nn.ReLU(inplace=True),
         )
         # Replace last two C2f modules with C2f-DWR
-        self.c2f1 = C2fDWR(32, 64, num_dwr=1)
-        self.c2f2 = C2fDWR(64, 128, num_dwr=1)
+        self.c2f1 = C2fDWR(32, 64, num_dwr=1, dilation_rates=(1, 2, 3))
+        self.c2f2 = C2fDWR(64, 128, num_dwr=1, dilation_rates=(1, 2, 3))
         # SPPF-LSKA neck
         self.sppf = SPPFLSKA(128, 128)
         # Detection head

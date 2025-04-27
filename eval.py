@@ -75,5 +75,5 @@ def evaluate_model(data_root, batch_size=8, device='cuda'):
         print("FLOPs profiling unavailable:", e)
 
 if __name__ == "__main__":
-    data_root = "/path/to/URPC2021"  # same root
+    data_root = "/workspaces/dl_proj/URPC2021"  # same root
     evaluate_model(data_root)

@@ -5,6 +5,7 @@ import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 from model import YOLOv8UC
+from PIL import Image
 
 class URPC2021Dataset(Dataset):
     """Dataset for URPC2021 in YOLO format."""
@@ -23,14 +24,10 @@ class URPC2021Dataset(Dataset):
 
     def __getitem__(self, idx):
         img_path = os.path.join(self.img_dir, self.img_files[idx])
-        # Load image (placeholder code; replace with PIL or cv2 in practice)
-        image = transforms.functional.pil_to_tensor(
-            transforms.functional.resize(
-                transforms.functional.pil_from_bytes(open(img_path, 'rb').read()),
-                (self.img_size, self.img_size)
-            )
-        )
-        image = image.float() / 255.0  # normalize to [0,1]
+        # Load image using PIL
+        image = Image.open(img_path).convert("RGB")  # Ensure 3-channel RGB image
+        image = self.transform(image)  # Apply transformations
+        image = image.float() / 255.0  # Normalize to [0,1]
         # Load labels (YOLO txt)
         boxes = []
         labels = []
@@ -85,6 +82,7 @@ class InnerSIoULoss(nn.Module):
 
 def train_model(root_dir, epochs=50, batch_size=8, lr=1e-3, device='cuda'):
     # Create datasets and loaders
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     train_dataset = URPC2021Dataset(root_dir, split='train', img_size=640)
     val_dataset   = URPC2021Dataset(root_dir, split='val',   img_size=640)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
@@ -142,5 +140,5 @@ def train_model(root_dir, epochs=50, batch_size=8, lr=1e-3, device='cuda'):
     torch.save(model.state_dict(), "yolov8_uc.pth")
 
 if __name__ == "__main__":
-    data_root = "/path/to/URPC2021"  # replace with actual path
+    data_root = "/workspaces/dl_proj/URPC2021"  # replace with actual path
     train_model(data_root)
