@@ -157,7 +157,7 @@ def train_model(root_dir,
 if __name__ == "__main__":
     print("==>> Running train_debug.py")
     try:
-        train_model(root_dir="/workspaces/dl_proj/URPC2021",
+        train_model(root_dir="/scratch/cs22b053/dl/dl_proj/URPC2021_prepared",
                     epochs=10,
                     batch_size=1,
                     img_size=320,
